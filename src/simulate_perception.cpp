@@ -31,6 +31,10 @@ class Perception{
         float camera_tilt_angle = 45; 
         float camera_vertical_FOV = 60;
         float camera_horizontal_FOV = 90;
+        float camera_view_distance = 25;
+        float camera_offset_x = 0.0;
+        float camera_offset_y = 0.0;
+        float camera_offset_z = 0.0;
 
         XmlRpc::XmlRpcValue xml_green_totem;
         XmlRpc::XmlRpcValue xml_red_totem;
@@ -38,7 +42,7 @@ class Perception{
         float **red_totem_list;
         float **green_totem_list;
         bool *red_totem_status;
-        bool *greeb_totem_status;
+        bool *green_totem_status;
         int object_num = 0;
         int object_dim = 0;
         //default
@@ -59,8 +63,10 @@ class Perception{
         
         bool isInFOV(float *object_pose);
         void boundaryGenerate(float height);
+        void goalPointEval();
         void boundaryVisualize();
         void objectVisualize();
+        void goalPointVisualize();
 };
 
 Perception :: Perception(){
@@ -75,9 +81,9 @@ Perception :: Perception(){
 }
 
 void Perception :: dronePositionCallback(const geometry_msgs::PoseStamped::ConstPtr& msg){
-    current_pose[0] =  msg->pose.position.x;
-    current_pose[1] =  msg->pose.position.y;
-    current_pose[2] =  msg->pose.position.z;
+    current_pose[0] =  msg->pose.position.x + camera_offset_x;
+    current_pose[1] =  msg->pose.position.y + camera_offset_y;
+    current_pose[2] =  msg->pose.position.z + camera_offset_z;
     current_pose[3] =  msg->pose.orientation.x;
     current_pose[4] =  msg->pose.orientation.y;
     current_pose[5] =  msg->pose.orientation.z;
@@ -140,12 +146,14 @@ void Perception :: simPerception(){
         if(isInFOV(red_totem_list[i])){ red_totem_status[i] = true;}
         else{ red_totem_status[i] = false;}
 
-        if(isInFOV(green_totem_list[i])){ greeb_totem_status[i] = true; }
-        else{ greeb_totem_status[i] = false; }
+        if(isInFOV(green_totem_list[i])){ green_totem_status[i] = true; }
+        else{ green_totem_status[i] = false; }
     }
+    goalPointEval();
     
     objectVisualize();
     boundaryVisualize();
+    goalPointVisualize();
 
     return;
 }
@@ -158,14 +166,14 @@ void Perception :: loadObject(){
     red_totem_status = new bool [object_num];
 
     green_totem_list = new float *[object_num];
-    greeb_totem_status = new bool [object_num];
+    green_totem_status = new bool [object_num];
 
     for(int i = 0; i < object_num; i++){ red_totem_list[i] = new float[object_dim]; }
     for(int i = 0; i < object_num; i++){ green_totem_list[i] = new float[object_dim]; }
     
     for(int i = 0; i < object_num; i++){
         red_totem_status[i] = false;
-        greeb_totem_status[i] = false;
+        green_totem_status[i] = false;
 
         for(int j = 0; j < object_dim; j++){
             try{
@@ -202,18 +210,30 @@ void Perception :: boundaryGenerate(float height){
     angle_right_yz_plane = camera_horizontal_FOV / 2 - (float)(roll * 180 / PI);
     angle_left_yz_plane = camera_horizontal_FOV / 2 + (float)(roll * 180 / PI);
 
-    // calculate roll + pitch
+    cout << "inner: " << angle_inner_xz_plane << " outer: " << angle_outer_xz_plane << endl;
 
-    // up-left (+, +)
-    boundary[0][0] = current_pose[0] + height * tan(angle_outer_xz_plane * (PI / 180));
-    boundary[0][1] = current_pose[1] + height / cos(angle_outer_xz_plane * (PI / 180))
-                     * tan(angle_left_yz_plane * (PI / 180));
-    boundary[0][2] = 0;
-    // up-right (+, -)
-    boundary[1][0] = current_pose[0] + height * tan(angle_outer_xz_plane * (PI / 180));
-    boundary[1][1] = current_pose[1] - height / cos(angle_outer_xz_plane * (PI / 180))
-                     * tan(angle_right_yz_plane * (PI / 180));
-    boundary[1][2] = 0;
+    // calculate roll + pitch
+    if(angle_outer_xz_plane >= 90){ // limit by camera view distance
+        // up-left (+, +)
+        boundary[0][0] = current_pose[0] + camera_view_distance * cos(angle_outer_xz_plane - 90);
+        boundary[0][1] = current_pose[1] - camera_view_distance * tan(angle_left_yz_plane * (PI / 180));
+        boundary[0][2] = 0;
+        // up-right (+, -)
+        boundary[1][0] = current_pose[0] + camera_view_distance * cos(angle_outer_xz_plane - 90);
+        boundary[1][1] = current_pose[1] + camera_view_distance * tan(angle_right_yz_plane * (PI / 180));
+        boundary[1][2] = 0;
+    }else{
+        // up-left (+, +)
+        boundary[0][0] = current_pose[0] + height * tan(angle_outer_xz_plane * (PI / 180));
+        boundary[0][1] = current_pose[1] + height / cos(angle_outer_xz_plane * (PI / 180))
+                        * tan(angle_left_yz_plane * (PI / 180));
+        boundary[0][2] = 0;
+        // up-right (+, -)
+        boundary[1][0] = current_pose[0] + height * tan(angle_outer_xz_plane * (PI / 180));
+        boundary[1][1] = current_pose[1] - height / cos(angle_outer_xz_plane * (PI / 180))
+                        * tan(angle_right_yz_plane * (PI / 180));
+        boundary[1][2] = 0;
+    }
     // down-right (+, -)
     boundary[2][0] = current_pose[0] + height * tan(angle_inner_xz_plane * (PI / 180));
     boundary[2][1] = current_pose[1] - height / cos(angle_inner_xz_plane * (PI / 180))
@@ -267,6 +287,16 @@ void Perception :: boundaryGenerate(float height){
     return;
 }
 
+void Perception :: goalPointEval(){
+    int red_totem_num = 0, green_totem_num = 0;
+    for(int i = 0; i < object_num; i++){
+        red_totem_num+=red_totem_status[i];
+        green_totem_num+=green_totem_status[i];
+    }
+    // cout << "red: " << red_totem_num << " ,green: " << green_totem_num << endl;
+    return;
+}
+
 void Perception :: objectVisualize(){
     visualization_msgs::MarkerArray pub_msg_object;
 
@@ -305,8 +335,8 @@ void Perception :: objectVisualize(){
         marker.scale.y = 1;
         marker.scale.z = 1;
         // green  
-        marker.color.g = greeb_totem_status[i];
-        marker.color.b = ~greeb_totem_status[i];
+        marker.color.g = green_totem_status[i];
+        marker.color.b = ~green_totem_status[i];
         marker.color.a = 1.0;
         marker.pose.position.x = green_totem_list[i][0];
         marker.pose.position.y = green_totem_list[i][1];
@@ -322,12 +352,12 @@ void Perception :: objectVisualize(){
 void Perception :: boundaryVisualize(){
     visualization_msgs::Marker pub_msg_boundary;
 
-    // for(int i = 0; i < 4; i++){
-    //     for(int j = 0; j < 3; j++){
-    //         cout << boundary[i][j] << " ";
-    //     }
-    //     cout << endl;
-    // }
+    for(int i = 0; i < 4; i++){
+        for(int j = 0; j < 3; j++){
+            cout << boundary[i][j] << " ";
+        }
+        cout << endl;
+    }
 
     pub_msg_boundary.header.frame_id = "local_origin";
     pub_msg_boundary.header.stamp = ros::Time::now();
@@ -359,12 +389,21 @@ void Perception :: boundaryVisualize(){
     return;
 }
 
+void Perception :: goalPointVisualize(){
+
+    return;
+}
+
 void Perception :: getParam(){
     n.getParam("/perception/camera_tilt_angle", camera_tilt_angle);
     n.getParam("/perception/camera_vertical_FOV", camera_vertical_FOV);
     n.getParam("/perception/camera_horizontal_FOV", camera_horizontal_FOV);
     n.getParam("/perception/red_totem", xml_red_totem);
     n.getParam("/perception/green_totem", xml_green_totem);
+    n.getParam("/perception/camera_offset_x", camera_offset_x);
+    n.getParam("/perception/camera_offset_y", camera_offset_y);
+    n.getParam("/perception/camera_offset_z", camera_offset_z);
+    n.getParam("/perception/camera_view_distance", camera_view_distance);
     object_num = xml_red_totem.size();
     object_dim = xml_red_totem[0].size();
     return;

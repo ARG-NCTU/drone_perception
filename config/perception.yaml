@@ -1,7 +1,10 @@
 camera_tilt_angle: 60 #degree
 camera_vertical_FOV: 50 #degree
 camera_horizontal_FOV: 69 #degree
-
+camera_view_distance: 25 #meter
+camera_offset_x: 0 #meter
+camera_offset_y: 0 #meter
+camera_offset_z: 15 #meter
 red_totem: [
   [50.5, 52.15, 0],
   [65.38, 47.37, 0],

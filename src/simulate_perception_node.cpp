@@ -75,8 +75,8 @@ Perception :: Perception(){
     pub_marker_object = n.advertise<visualization_msgs::MarkerArray>("drone_marker/object", 10);
     // pub_totem_pose = n.advertise<::>("", 10);
     // sub_totem_gt = n.subscribe<::>("", 1,  &Perception::, this);
-    // sub_current_pose = n.subscribe<geometry_msgs::PoseStamped>("move_base_simple/goal", 1,  &Perception::dronePositionCallback, this);
-    sub_current_pose = n.subscribe<geometry_msgs::PoseStamped>("mavros/local_position/pose", 1,  &Perception::dronePositionCallback, this);
+    sub_current_pose = n.subscribe<geometry_msgs::PoseStamped>("move_base_simple/goal", 1,  &Perception::dronePositionCallback, this);
+    // sub_current_pose = n.subscribe<geometry_msgs::PoseStamped>("mavros/local_position/pose", 1,  &Perception::dronePositionCallback, this);
     sub_wamv_pose = n.subscribe<geometry_msgs::PoseStamped>("/landing_area", 1,  &Perception::wamvPositionCallback, this);
 }
 
@@ -211,16 +211,17 @@ void Perception :: boundaryGenerate(float height){
     angle_left_yz_plane = camera_horizontal_FOV / 2 + (float)(roll * 180 / PI);
 
     cout << "inner: " << angle_inner_xz_plane << " outer: " << angle_outer_xz_plane << endl;
+    cout << "left: " << angle_left_yz_plane << " right: " << angle_right_yz_plane << endl;
 
     // calculate roll + pitch
     if(angle_outer_xz_plane >= 90){ // limit by camera view distance
         // up-left (+, +)
         boundary[0][0] = current_pose[0] + camera_view_distance * cos(angle_outer_xz_plane - 90);
-        boundary[0][1] = current_pose[1] - camera_view_distance * tan(angle_left_yz_plane * (PI / 180));
+        boundary[0][1] = current_pose[1] + camera_view_distance * tan(angle_left_yz_plane * (PI / 180));
         boundary[0][2] = 0;
         // up-right (+, -)
         boundary[1][0] = current_pose[0] + camera_view_distance * cos(angle_outer_xz_plane - 90);
-        boundary[1][1] = current_pose[1] + camera_view_distance * tan(angle_right_yz_plane * (PI / 180));
+        boundary[1][1] = current_pose[1] - camera_view_distance * tan(angle_right_yz_plane * (PI / 180));
         boundary[1][2] = 0;
     }else{
         // up-left (+, +)

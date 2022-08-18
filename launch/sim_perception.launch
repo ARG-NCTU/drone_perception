@@ -1,5 +1,5 @@
 <launch>
-    <node pkg="drone_perception" type="simulate_perception" name="perception" clear_params="true" output="screen">
+    <node pkg="drone_perception" type="simulate_perception_node" name="perception" clear_params="true" output="screen">
         <rosparam file="$(find drone_perception)/config/perception.yaml"/>
     </node>
 </launch>

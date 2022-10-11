@@ -1,5 +1,23 @@
 <launch>
-    <node pkg="drone_perception" type="simulate_perception_node" name="perception" clear_params="true" output="screen">
+    <!-- cond_node_name equal to condition name in behavior tree -->
+    <arg name="cond_node_name" default="find_pair"/>
+
+    <!-- act_node_name equal to name in behavior tree -->
+    <arg name="act_node_name" default="pair_eval"/>
+
+
+    <node pkg="drone_perception" type="simulate_perception_node" name="$(arg act_node_name)" clear_params="true" output="screen">
+        <remap from="perception/clear" to="perception/clear_pair"/>
+        <remap from="perception/state" to="perception_result/pair_state"/>
         <rosparam file="$(find drone_perception)/config/perception.yaml"/>
+    </node>
+
+    <node pkg="behavior_tree_extra" type="state_buffer" name="$(arg act_node_name)_finished" clear_params="true" output="screen">
+        <remap from="waypoint/state" to="$(arg act_node_name)_running_success"/>
+        <remap from="state_manager/reset" to="state_manager/reset_$(arg act_node_name)"/>
+    </node>
+
+    <node pkg="behavior_tree_extra" type="state_reset" name="$(arg act_node_name)_reset" clear_params="true" output="screen">
+        <remap from="state_manager/reset" to="state_manager/reset_$(arg act_node_name)"/>
     </node>
 </launch>

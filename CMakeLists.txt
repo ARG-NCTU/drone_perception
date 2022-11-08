@@ -127,9 +127,11 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
 add_executable(simulate_perception_node src/simulate_perception_node.cpp)
 add_executable(state_pair src/state_pair.cpp)
+add_executable(image_switch src/image_switch.cpp)
 
 target_link_libraries(simulate_perception_node ${catkin_LIBRARIES})
 target_link_libraries(state_pair ${catkin_LIBRARIES})
+target_link_libraries(image_switch ${catkin_LIBRARIES})
 
 # add_executable(vision_perception src/vision_perception.cpp)
 

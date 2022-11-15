@@ -8,6 +8,7 @@ from cv_bridge import CvBridge, CvBridgeError
 import math
 import tf
 
+from std_msgs.msg import String
 from sensor_msgs.msg import CameraInfo, Image
 from geometry_msgs.msg import PoseStamped
 
@@ -29,8 +30,13 @@ class Estimator():
         self.cv_bridge = CvBridge()
 
         ## tf publisher
-        # self.tf_pub = tf.TransformBroadcaster()
+        self.listener = tf.TransformListener()
 
+        # param
+        self.object_list = rospy.get_param('~object')
+        print("object class: ")
+        for i in self.object_list:
+            print(i)
         # Publisher & Subscriber
 
         rospy.Subscriber("desired_image/info", CameraInfo, self.camInfoCallback)
@@ -43,7 +49,8 @@ class Estimator():
         # rospy.Subscriber("/desired_image/depth", Image, self.depthImageCallback)
         # rospy.Subscriber("/darknet_ros/bounding_boxes", BoundingBoxes, self.boxesCallback)
         
-        self.pub_pose = rospy.Publisher("docking_pose", PoseStamped, queue_size=1)
+        self.pub_pose = rospy.Publisher("object_pose", PoseStamped, queue_size=1)
+        self.pub_class = rospy.Publisher("object_name", String, queue_size=1)
 
 
     def camInfoCallback(self, msg):
@@ -72,25 +79,32 @@ class Estimator():
             x = (msg_boxes.bounding_boxes[i].xmin + msg_boxes.bounding_boxes[i].xmax)/2
             y = (msg_boxes.bounding_boxes[i].ymin + msg_boxes.bounding_boxes[i].ymax)/2
             zc = cv_depth[int(y), int(x)]/1000.0
-            print("x, y:", x, y)
-            print("zc", zc)
+            # print("x, y:", x, y)
+            # print("zc", zc)
             rx, ry, rz = self.getXYZ(x/1.0 , y/1.0, zc/1.0)
             if(rx != 0):
-                # posest = PoseStamped()
-                # posest.pose.position.x = rx
-                # posest.pose.position.y = ry
-                # posest.pose.position.z = rz
-                # posest.header = depth_img.header
-                # posest.header.frame_id = "/aaa"
-                print("camera_pose: ", rx, ry, rz)
+                # case a
                 tf_pub = tf.TransformBroadcaster()
                 tf_pub.sendTransform((rx, ry, rz), tf.transformations.quaternion_from_euler(0,0,0), rospy.Time.now(), "object", "zedm_forward_left_camera_frame")
-                # try:
-                #     posest = self.listener.transformPose("base_link", posest)
-                # except (tf.Exception, tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
-                #     rospy.loginfo("faile to catch tf %s 2 %s" % ("/map", "/zed_mid_link"))    
-                #     return
-                # self.pub_pose.publish(posest)
+                # case a
+
+                # case b
+                object_pose = PoseStamped()
+                object_pose.pose.position.x = rx
+                object_pose.pose.position.y = ry
+                object_pose.pose.position.z = rz
+                object_pose.header = depth_img.header
+                object_pose.header.frame_id = "/zedm_forward_left_camera_frame"
+                # case b
+                # print("camera_pose: ", rx, ry, rz)
+
+                try:
+                    object_pose = self.listener.transformPose("drone", object_pose)
+                except (tf.Exception, tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+                    rospy.loginfo("faile to transform")    
+                    return
+                self.pub_pose.publish(object_pose)
+                # case b
 
     def bbboxesCallback(self, msg):
         depth_img = msg.depth_image

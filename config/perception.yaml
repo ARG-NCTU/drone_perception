@@ -1,17 +1,16 @@
-camera_tilt_angle: 45 #degree 60
-camera_vertical_FOV: 50 #degree
-camera_horizontal_FOV: 59 #degree
-camera_view_distance: 25 #meter
-camera_offset_x: 0 #meter
-camera_offset_y: 0 #meter
-camera_offset_z: 20 #meter 15
+camera_tilt_angle: 60 # degree 60
+camera_vertical_FOV: 50 # degree
+camera_horizontal_FOV: 59 # degree
+camera_view_distance: 25 # meter
+camera_offset_x: 0 # meter
+camera_offset_y: 0 # meter
+camera_offset_z: 0 # meter 
 
-cruise_height: 15 #meter
-duplicate_margin: 5 #meter
-evaluate_pair_threshold: 25 #meter
-goal_extend_length: 3 #meter
+duplicate_margin_object: 5 # meter
+duplicate_margin_goal: 0.5 # meter
+evaluate_pair_threshold: 25 # meter
+goal_extend_length: 0.01 # meter
 red_totem: [
-  [50.5, 52.15, 0],
   [65.38, 47.37, 0],
   [74.17, 58.7, 0],
   [63.63, 67.95, 0],
@@ -21,7 +20,6 @@ red_totem: [
 ]
 
 green_totem: [
-  [42.64, 37.09, 0],
   [70.31, 34.41, 0],
   [86.46, 53.88, 0],
   [76.85, 73.88, 0],
@@ -30,8 +28,9 @@ green_totem: [
   [65.7, 111.6, 0],
 ]
 
-
-# y
-# n
-# y
-# n
+white_totem: [
+  [50, 140, 0],
+  [65, 135, 0],
+  [50.5, 52.15, 0],
+  [42.64, 37.09, 0],
+]

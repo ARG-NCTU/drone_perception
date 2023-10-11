@@ -1,0 +1,18 @@
+<launch>
+
+    <node pkg="drone_setup" type="format_transfer_front.py" name="format_transfer_front" />
+    <node pkg="drone_setup" type="format_transfer_left.py" name="format_transfer_left" />
+    <node pkg="drone_setup" type="format_transfer_right.py" name="format_transfer_right" />
+    
+
+    <node pkg="image_transport" type="republish" name="front_compressed" 
+    args="raw in:=/camera_front/depth/image_new compressedDepth out:=/camera_front/depth/image_raw"/>
+
+    <node pkg="image_transport" type="republish" name="left_compressed" 
+    args="raw in:=/camera_left/depth/image_new compressedDepth out:=/camera_left/depth/image_raw"/>
+
+    <node pkg="image_transport" type="republish" name="right_compressed" 
+    args="raw in:=/camera_right/depth/image_new compressedDepth out:=/camera_right/depth/image_raw"/>
+
+
+</launch>

@@ -9,6 +9,7 @@ project(drone_perception)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   cv_bridge
+  behavior_tree
   image_transport
   sensor_msgs
   roscpp
@@ -124,9 +125,13 @@ include_directories(
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
-# add_executable(simulate_perception src/simulate_perception.cpp)
+add_executable(simulate_perception_totem src/simulate_perception_totem.cpp)
+add_executable(state_pair src/state_pair.cpp)
+add_executable(image_switch src/image_switch.cpp)
 
-# target_link_libraries(simulate_perception ${catkin_LIBRARIES})
+target_link_libraries(simulate_perception_totem ${catkin_LIBRARIES})
+target_link_libraries(state_pair ${catkin_LIBRARIES})
+target_link_libraries(image_switch ${catkin_LIBRARIES})
 
 # add_executable(vision_perception src/vision_perception.cpp)
 

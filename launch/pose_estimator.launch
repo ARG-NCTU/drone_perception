@@ -1,0 +1,13 @@
+<launch>
+    <arg name="node_name" default="drone_pose_estimator"/>
+
+    <!-- mode: land / sea -->
+    <arg name="mode" default="land"/>
+    
+
+    <node pkg="drone_perception" type="pose_estimator.py" name="$(arg node_name)_$(arg mode)" clear_params="true" output="screen">
+        <!-- <remap from="perception/clear" to="perception/clear_pair"/>
+        <remap from="perception/state" to="perception_result/pair_state"/> -->
+        <rosparam file="$(find drone_perception)/config/$(arg mode)_object.yaml"/>
+    </node>
+</launch>

@@ -1,0 +1,30 @@
+<launch>
+    <!-- node_name will be the prefix of three action node name in behavior tree -->
+    <arg name="node_name" default="set_image"/>
+
+    <arg name="forward_camera_rgb" default="/zedm_forward/zed_node/rgb/image_rect_color"/>
+    <arg name="forward_camera_depth" default="/zedm_forward/zed_node/depth/depth_registered"/>
+    <arg name="forward_camera_info" default="/zedm_forward/zed_node/depth/camera_info"/>
+    
+    <arg name="downward_camera_rgb" default="/d435_downward/color/image_raw"/>
+    <arg name="downward_camera_depth" default="/d435_downward/depth/image_raw"/>
+    <arg name="downward_camera_info" default="/d435_downward/color/camera_info"/>
+
+    <arg name="backward_camera_rgb" default="/d435_backward/color/image_raw"/>
+    <arg name="backward_camera_depth" default="/d435_backward/depth/image_raw"/>
+    <arg name="backward_camera_info" default="/d435_backward/color/camera_info"/>
+
+    <node pkg="drone_perception" type="image_switch" name="$(arg node_name)" clear_params="true" output="screen">
+        <remap from="forward/image/rgb" to="$(arg forward_camera_rgb)"/>
+        <remap from="downward/image/rgb" to="$(arg downward_camera_rgb)"/>
+        <remap from="backward/image/rgb" to="$(arg backward_camera_rgb)"/>
+
+        <remap from="forward/image/depth" to="$(arg forward_camera_depth)"/>
+        <remap from="downward/image/depth" to="$(arg downward_camera_depth)"/>
+        <remap from="backward/image/depth" to="$(arg backward_camera_depth)"/>
+
+        <remap from="forward/image/info" to="$(arg forward_camera_info)"/>
+        <remap from="downward/image/info" to="$(arg downward_camera_info)"/>
+        <remap from="backward/image/info" to="$(arg backward_camera_info)"/>
+    </node>
+</launch>

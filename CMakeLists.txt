@@ -124,9 +124,9 @@ include_directories(
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
-add_executable(simulate_perception src/simulate_perception.cpp)
+# add_executable(simulate_perception src/simulate_perception.cpp)
 
-target_link_libraries(simulate_perception ${catkin_LIBRARIES})
+# target_link_libraries(simulate_perception ${catkin_LIBRARIES})
 
 # add_executable(vision_perception src/vision_perception.cpp)
 

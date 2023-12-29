@@ -1,0 +1,13 @@
+<launch>
+    <arg name="namespace" default="drone" />
+
+    <group ns="$(arg namespace)/perception">
+        <node name="ball_visual_servoing" pkg="drone_perception" type="ball_visual_servoing.py"
+            output="screen">
+            <remap from="/camera_front/rgb/image_raw/compressed" to="/$(arg namespace)/front_camera/rgb/image_raw/compressed" />
+            <remap from="/ball_tracker/image_processed/compressed" to="ball_tracker/image_processed/compressed" />
+            <remap from="/target/error" to="target/error" />
+            <remap from="/object_in_view_success" to="/object_in_view_success" />
+        </node>
+    </group>
+</launch>

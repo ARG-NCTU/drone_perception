@@ -1,0 +1,34 @@
+<launch>
+
+    <node pkg="drone_perception" type="format_transfer_front.py" name="format_transfer_front" >
+        <remap from='/camera_front/depth/image_raw' to='/drone/front_camera/depth/image_raw'/>
+        <remap from='/camera_front/depth/image_new' to='/drone/front_camera/depth/image_new' />
+    </node>
+    <node pkg="drone_perception" type="format_transfer_front.py" name="format_transfer_left" >
+        <remap from='/camera_front/depth/image_raw' to='/drone/left_camera/depth/image_raw'/>
+        <remap from='/camera_front/depth/image_new' to='/drone/left_camera/depth/image_new'/>
+    </node>
+    <node pkg="drone_perception" type="format_transfer_front.py" name="format_transfer_right" >
+        <remap from='/camera_front/depth/image_raw' to='/drone/right_camera/depth/image_raw'/>
+        <remap from='/camera_front/depth/image_new' to='/drone/right_camera/depth/image_new'/>
+    </node>
+    <node pkg="drone_perception" type="format_transfer_front.py" name="format_transfer_doen" >
+        <remap from='/camera_front/depth/image_raw' to='/drone/downward_camera/depth/image_raw'/>
+        <remap from='/camera_front/depth/image_new' to='/drone/downward_camera/depth/image_new'/>
+    </node>
+    
+
+    <node pkg="image_transport" type="republish" name="front_compressed" 
+    args="raw in:=/drone/front_camera/depth/image_new compressedDepth out:=/drone/front_camera/depth/image_raw"/>
+
+    <node pkg="image_transport" type="republish" name="left_compressed" 
+    args="raw in:=/drone/left_camera/depth/image_new compressedDepth out:=/drone/left_camera/depth/image_raw"/>
+
+    <node pkg="image_transport" type="republish" name="right_compressed" 
+    args="raw in:=/drone/right_camera/depth/image_new compressedDepth out:=/drone/right_camera/depth/image_raw"/>
+
+    <node pkg="image_transport" type="republish" name="down_compressed"
+    args="raw in:=/drone/downward_camera/depth/image_new compressedDepth out:=/drone/downward_camera/depth/image_raw"/>
+
+
+</launch>

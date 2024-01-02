@@ -32,8 +32,8 @@ class BallTracker:
             hsv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
 
             # Define the range for detecting red color in HSV space
-            lower_red = np.array([0, 100, 50])
-            upper_red = np.array([10, 255, 150])
+            lower_red = np.array([0, 50, 80])
+            upper_red = np.array([10, 255, 255])
 
             # Create a binary mask for the red color
             mask = cv2.inRange(hsv_image, lower_red, upper_red)
@@ -61,6 +61,7 @@ class BallTracker:
                 # Publish the twist command
                     self.cmd_vel_pub.publish(twist)
                     self.object_state = True
+                    rospy.loginfo_throttle(1, "x: {}, y: {}".format(error_x, error_y))
                 # print("error_x: ", error_x)
                 # print("error_y: ", error_y)
 

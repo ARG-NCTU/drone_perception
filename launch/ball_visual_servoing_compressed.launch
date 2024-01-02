@@ -2,7 +2,7 @@
     <arg name="namespace" default="drone" />
 
     <group ns="$(arg namespace)/perception">
-        <node name="ball_visual_servoing" pkg="drone_perception" type="ball_visual_servoing.py"
+        <node name="ball_visual_servoing_compressed" pkg="drone_perception" type="ball_visual_servoing_compressed.py"
             output="screen">
             <remap from="/camera_front/rgb/image_raw/compressed" to="/$(arg namespace)/front_camera/rgb/image_raw/compressed" />
             <remap from="/ball_tracker/image_processed/compressed" to="ball_tracker/image_processed/compressed" />

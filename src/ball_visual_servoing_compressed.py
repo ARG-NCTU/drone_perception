@@ -33,9 +33,9 @@ class BallTracker:
 
             # Define the range for detecting red color in HSV space
             lower_red1 = np.array([0, 100, 80])
-            upper_red1 = np.array([10, 255, 120])
+            upper_red1 = np.array([10, 255, 255])
             lower_red2 = np.array([350, 100, 80])
-            upper_red2 = np.array([360, 255, 120])
+            upper_red2 = np.array([360, 255, 255])
 
             # Create a binary mask for the red color
             mask1 = cv2.inRange(hsv_image, lower_red1, upper_red1)

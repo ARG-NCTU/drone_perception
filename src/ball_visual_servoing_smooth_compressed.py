@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import cv2
+import cv_bridge
 import numpy as np
 import rospy
 from cv_bridge import CvBridge
@@ -59,30 +60,42 @@ class DroneImageProcessor:
         if contours:
             contours = [c for c in contours if cv2.contourArea(c) > min_area_threshold]
 
-        if contours:
-            red_circle_contour = max(contours, key=cv2.contourArea)
-            M = cv2.moments(red_circle_contour)
-            if M["m00"] != 0:
-                cx = int(M["m10"] / M["m00"])
-                cy = int(M["m01"] / M["m00"])
+            merged_rect = None
+            for contour in contours:
+                rect = cv2.boundingRect(contour)
+                if merged_rect is None:
+                    merged_rect = rect
+                else:
+                    merged_rect = self.merge_rect(merged_rect, rect)
+
+            if merged_rect:
+                x, y, w, h = merged_rect
+                self.draw_bounding_box_with_label(img, merged_rect, "Target")
+                cx, cy = x + w // 2, y + h // 2
+                image_center_x = img.shape[1] // 2
+                image_center_y = img.shape[0] // 2
+
+                offset_x = image_center_x - cx
+                offset_y = image_center_y - cy
+
+                self.publish_object_in_view(True)
             else:
-                cx, cy = 0, 0
-            image_center_x = img.shape[1] // 2
-            image_center_y = img.shape[0] // 2
-
-            offset_x = image_center_x - cx
-            offset_y = image_center_y - cy
-
-            self.publish_object_in_view(True)
-
-            self.draw_bounding_box_with_label(img, red_circle_contour, "Target")
+                self.publish_object_in_view(False)
         else:
-            offset_x, offset_y = 0, 0
             self.publish_object_in_view(False)
 
         self.publish_error_twist(offset_x, offset_y)
         rospy.loginfo_throttle(1, "Offset x: {}, Offset y: {}".format(offset_x, offset_y))
         return img, mask, contours
+
+    def merge_rect(self, rect1, rect2):
+        x1, y1, w1, h1 = rect1
+        x2, y2, w2, h2 = rect2
+        x = min(x1, x2)
+        y = min(y1, y2)
+        w = max(x1 + w1, x2 + w2) - x
+        h = max(y1 + h1, y2 + h2) - y
+        return (x, y, w, h)
 
     def draw_crosshair(self, img):
         image_center_x = img.shape[1] // 2
@@ -124,9 +137,10 @@ class DroneImageProcessor:
             2,
         )
 
-    def draw_bounding_box_with_label(self, img, contour, label):
-        x, y, w, h = cv2.boundingRect(contour)
+    def draw_bounding_box_with_label(self, img, rect, label):
+        x, y, w, h = rect
         cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
+
         # Label the bounding box
         font = cv2.FONT_HERSHEY_SIMPLEX
         font_scale = 0.4
@@ -140,6 +154,7 @@ class DroneImageProcessor:
 
         # Put the text on the image
         cv2.putText(img, label, (x, y - 5), font, font_scale, (255, 255, 255), font_thickness, lineType=cv2.LINE_AA)
+
 
     def publish_images(self, processed_image, detect_result):
         try:

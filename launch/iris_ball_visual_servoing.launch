@@ -1,0 +1,9 @@
+<launch>
+    <node name="ball_visual_servoing" pkg="drone_perception" type="ball_visual_servoing.py"
+        output="screen">
+        <remap from="/camera_front/rgb/image_raw" to="/camera/rgb/image_raw" />
+        <remap from="/ball_tracker/image_processed" to="/ball_tracker/image_processed" />
+        <remap from="/target/error" to="target/error" />
+        <remap from="/object_in_view_success" to="/object_in_view_success" />
+    </node>
+</launch>

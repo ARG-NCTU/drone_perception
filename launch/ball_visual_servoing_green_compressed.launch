@@ -1,0 +1,21 @@
+<launch>
+    <arg name="namespace" default="drone" />
+    <arg name="smooth" default="true" />
+
+    <group ns="$(arg namespace)/perception">
+        <node name="ball_visual_servoing_compressed" pkg="drone_perception"
+            type="ball_visual_servoing_green_compressed.py" output="screen" unless="$(arg smooth)">
+            <remap from="/camera_front/rgb/image_raw/compressed" to="/$(arg namespace)/downward_camera/rgb/image_raw/compressed" />
+            <remap from="/ball_tracker/image_processed/compressed" to="ball_tracker/image_processed/compressed" />
+            <remap from="/target/error" to="/drone/controller/target/error" />
+            <remap from="/object_in_view_success" to="/object_in_view_success" />
+        </node>
+
+        <node name="ball_visual_servoing_smooth_compressed" pkg="drone_perception" type="ball_visual_servoing_smooth_compressed.py" output="screen" if="$(arg smooth)">
+            <remap from="/camera_front/rgb/image_raw/compressed" to="/$(arg namespace)/downward_camera/rgb/image_raw/compressed" />
+            <remap from="/ball_tracker/image_processed/compressed" to="ball_tracker/image_processed/compressed" />
+            <remap from="/target/error" to="target/error" />
+            <remap from="/object_in_view_success" to="/object_in_view_success" />
+        </node>
+    </group>
+</launch>

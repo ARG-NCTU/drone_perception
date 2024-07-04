@@ -1,0 +1,25 @@
+<launch>
+    <!--opencv detector for target object in RGB image pixel and depth value of that pixel in depth img -->
+    <node name="bar_detector" pkg="drone_perception" type="bar_visual_servoing.py" output="screen"> 
+        <remap from="/target/center" to="/front_camera/target/center" />
+        <remap from="/target/distance" to="/front_camera/target/distance"/>
+    </node>
+
+    <!-- estimate the pose with pinhole camera model and transform the estimate pose to drone frame and arm frame -->
+    <node name="bar_pose_estimator" pkg="drone_perception" type="object_pose_estimate.py" output="screen">
+        <remap from="/target/center" to="/front_camera/target/center" />
+        <remap from="/target/distance" to="/front_camera/target/distance"/>
+        <remap from="/target/pose/camera_frame" to="/front_camera/target/pose/camera_frame"/>
+        <remap from="/target/pose/arm_baselink" to="/front_camera/target/pose/arm_baselink"/>
+        <remap from="/target/pose/drone_baselink" to="/front_camera/target/pose/drone_baselink"/>
+        
+        <param name="source_frame" value="drone/front_camera_optical_link"/>
+    </node>
+
+    <!-- use the arm_frame object distance value to check the target is in grasp distance or not? -->
+    <node name="grasp_dis_condition_checker" pkg="drone_perception" type="grasp_dis_condition_checker.py">
+        <remap from="/target/pose/arm_baselink" to="/front_camera/target/pose/arm_baselink"/>
+        <param name="distance_threshold" value="0.75"/>
+    </node>
+
+</launch>

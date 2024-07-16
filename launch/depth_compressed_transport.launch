@@ -12,7 +12,7 @@
         <remap from='/camera_front/depth/image_raw' to='/drone/right_camera/depth/image_raw'/>
         <remap from='/camera_front/depth/image_new' to='/drone/right_camera/depth/image_new'/>
     </node>
-    <node pkg="drone_perception" type="format_transfer_front.py" name="format_transfer_doen" >
+    <node pkg="drone_perception" type="format_transfer_front.py" name="format_transfer_down" >
         <remap from='/camera_front/depth/image_raw' to='/drone/downward_camera/depth/image_raw'/>
         <remap from='/camera_front/depth/image_new' to='/drone/downward_camera/depth/image_new'/>
     </node>

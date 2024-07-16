@@ -73,7 +73,7 @@ class DroneImageProcessor:
                 self.draw_bounding_box_with_label(img, merged_rect, "Target")
                 cx, cy = x + w // 2, y + h // 2
                 image_center_x = img.shape[1] // 2
-                image_center_y = img.shape[0] // 2
+                image_center_y = img.shape[0] // 2 - 80
 
                 offset_x = image_center_x - cx
                 offset_y = image_center_y - cy
@@ -99,7 +99,7 @@ class DroneImageProcessor:
 
     def draw_crosshair(self, img):
         image_center_x = img.shape[1] // 2
-        image_center_y = img.shape[0] // 2
+        image_center_y = img.shape[0] // 2 - 80
         crosshair_radius = 20  # Radius of the circle at the center
         crosshair_length = 30  # Length of the lines extending from the circle
         crosshair_offset = 10
@@ -154,7 +154,6 @@ class DroneImageProcessor:
 
         # Put the text on the image
         cv2.putText(img, label, (x, y - 5), font, font_scale, (255, 255, 255), font_thickness, lineType=cv2.LINE_AA)
-
 
     def publish_images(self, processed_image, detect_result):
         try:

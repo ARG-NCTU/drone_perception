@@ -16,6 +16,7 @@ class GraspConditionChecker:
         self.condition_publisher = rospy.Publisher('/object_in_grasp_distance_success', Bool, queue_size=1)
         
         self.current_distance = None
+        self.target_in_distance = False
 
         # Create a timer to check the condition at 5Hz
         rospy.Timer(rospy.Duration(1.0 / 5), self.check_condition)
@@ -37,7 +38,11 @@ class GraspConditionChecker:
         """
         if self.current_distance is not None:
             in_grasp_distance = self.current_distance < self.target_distance_threshold
-            self.condition_publisher.publish(Bool(data=in_grasp_distance))
+            if in_grasp_distance: # lock the target_in_distance to true if target is in grasp distance for first time
+                self.target_in_distance = True
+                rospy.loginfo("Target object is in grasp distance.")
+            
+            self.condition_publisher.publish(Bool(data=self.target_in_distance))
 
 if __name__ == '__main__':
     try:
